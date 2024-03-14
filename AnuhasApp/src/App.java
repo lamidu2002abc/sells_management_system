@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class App {
     public static void main(String[] args) {
+//        dev
 //        SQLManager.pushToClothCategoryTable(0, "Crewneck T-shirts");
 //        SQLManager.pushToClothCategoryTable(1, "V-neck T-shirts");
 //        SQLManager.pushToClothCategoryTable(2, "Polo Shirts");
@@ -11,7 +12,7 @@ public class App {
 //        SQLManager.pushToClothCategoryTable(4, "Graphic T-shirts");
         Map<Integer,String> map = SQLManager.pullAllFromClothCategoryTable();
 //        SQLManager.truncateTable("cloth_category_table");
-        // this line was written in github 
+        
         
     }
     
