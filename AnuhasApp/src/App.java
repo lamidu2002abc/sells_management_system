@@ -11,6 +11,7 @@ public class App {
 //        SQLManager.pushToClothCategoryTable(4, "Graphic T-shirts");
         Map<Integer,String> map = SQLManager.pullAllFromClothCategoryTable();
 //        SQLManager.truncateTable("cloth_category_table");
+        // this line was written in github 
         
     }
     
