@@ -39,12 +39,11 @@ public class SQLManager {
             statement = connection.prepareStatement(query);
             int i=1;
             for (Object object : array) {
-                if (object instanceof String){
-                    statement.setString(i,(String) object);
-                }   
-                else{
-                    statement.setInt(i,(int) object);
-                }        
+                if (object instanceof String) statement.setString(i,(String) object);
+                else statement.setInt(i,(int) object);
+                int x = statement.executeUpdate();
+                connection.close();
+                System.out.println(x+" Rows has been updated");
                 i++;     
             }
         }
