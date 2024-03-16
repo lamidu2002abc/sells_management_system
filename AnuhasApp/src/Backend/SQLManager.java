@@ -17,7 +17,7 @@ public class SQLManager {
 
     
 //    Defining essential attributes for sql Connection
-    private static final String url = "jdbc:mysql://localhost:3306/anuhasdatabase";
+    private static final String url = "jdbc:mysql://localhost:3306/cloth_shop_test";
     private static final String userName = "root";
     private static final String password = "lamidu@123";
     private static Connection connection;
@@ -33,7 +33,8 @@ public class SQLManager {
         }
         return connection;
     } 
-    private static void executeQuery(String query, Object[] array) {
+
+    public static void executeQuery(String query, Object[] array) {
         try{
             connection = DriverManager.getConnection(url,userName,password);
             statement = connection.prepareStatement(query);
@@ -51,9 +52,7 @@ public class SQLManager {
             System.out.println(exc.getMessage());
             System.out.println("\n---- stack trace ----");
             exc.printStackTrace();
-        }
-
-        
+        }   
     }
 
 
@@ -66,18 +65,7 @@ public class SQLManager {
     //     );
     public static void pushToCategory(String categoryName){
         String query = "insert into category(cname) values (?)";
-        try{
-            statement = getConnection().prepareStatement(query);
-            statement.setString(1,categoryName);
-            int x = statement.executeUpdate();
-            connection.close();
-            System.out.println(x+" Rows has been updated");
-        }
-        catch(SQLException exc){
-            System.out.println(exc.getMessage());
-            System.out.println("\n---- stack trace ----");
-            exc.printStackTrace();
-        }
+        executeQuery(query, new Object[]{categoryName});
     }
 
     //     stock ->
@@ -93,23 +81,8 @@ public class SQLManager {
     // );
     public static void pushToStock(int cid, String size, int stock_quantity, int buying_price, int selling_price, String buying_date){
         String query = "insert into stock(cid,size,stock_quantity,buying_price,selling_price,buying_data) values (?,?,?,?,?,?)";
-        try{
-            statement = getConnection().prepareStatement(query);
-            statement.setInt(1, cid);
-            statement.setString(2,size);
-            statement.setInt(3,stock_quantity);
-            statement.setInt(4,buying_price);
-            statement.setInt(5,selling_price);
-            statement.setString(5,buying_date);
-            int x = statement.executeUpdate();
-            connection.close();
-            System.out.println(x+" Rows has been updated");
-        }
-        catch(SQLException exc){
-            System.out.println(exc.getMessage());
-            System.out.println("\n---- stack trace ----");
-            exc.printStackTrace();
-        }
+        Object[] row = new Object[] {cid,size,stock_quantity,buying_price,selling_price,buying_date};
+        executeQuery(query, row);
     }
 
 
@@ -149,14 +122,14 @@ public class SQLManager {
         }
     } 
     public static Map<Integer,String> pullAllFromClothCategoryTable(){
-        String query = "select * from cloth_category";
+        String query = "select * from category";
         Map <Integer,String> categorySet = new HashMap<>();
         try{
             statement = getConnection().prepareStatement(query);
             ResultSet dataSet = statement.executeQuery();
             
             while(dataSet.next()){
-                categorySet.put(dataSet.getInt("category_id"),dataSet.getString("category_name"));
+                categorySet.put(dataSet.getInt("cid"),dataSet.getString("cname"));
             }
             System.out.println(categorySet);
             return categorySet;
