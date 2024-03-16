@@ -12,7 +12,7 @@ public class SQLManager {
 //    main tables -> 
 //          -> category
 //          -> stock
-//          -> transactio
+//          -> transaction
 //          -> inventory
 
     
@@ -33,12 +33,40 @@ public class SQLManager {
         }
         return connection;
     } 
+    private static void executeQuery(String query, Object[] array) {
+        try{
+            connection = DriverManager.getConnection(url,userName,password);
+            statement = connection.prepareStatement(query);
+            int i=1;
+            for (Object object : array) {
+                if (object instanceof String){
+                    statement.setString(i,(String) object);
+                }   
+                else{
+                    statement.setInt(i,(int) object);
+                }        
+                i++;     
+            }
+        }
+        catch(SQLException exc){
+            System.out.println(exc.getMessage());
+            System.out.println("\n---- stack trace ----");
+            exc.printStackTrace();
+        }
 
-//      pushing data into tables
+        
+    }
 
-//      category ->
+
+    //     PUSHING DATA INTO TABLES=========================================>
+
+    //     category ->
+    //     CREATE TABLE category ( 
+    //     cid INT AUTO_INCREMENT PRIMARY KEY, 
+    //     cname VARCHAR(255) NOT NULL
+    //     );
     public static void pushToCategory(String categoryName){
-        String query = "insert into category(c_name) values (?)";
+        String query = "insert into category(cname) values (?)";
         try{
             statement = getConnection().prepareStatement(query);
             statement.setString(1,categoryName);
@@ -52,21 +80,28 @@ public class SQLManager {
             exc.printStackTrace();
         }
     }
-//     CREATE TABLE Stock (
-//     sid INT AUTO_INCREMENT PRIMARY KEY,
-//     cid INT,
-//     size VARCHAR(50) NOT NULL,
-//     stock_quantity INT NOT NULL,
-//     buying_price DECIMAL(10, 2) NOT NULL,
-//     selling_price DECIMAL(10, 2) NOT NULL,
-//     buying_date DATE NOT NULL,
-//     FOREIGN KEY (cid) REFERENCES category(cid)
-// );
-//      category ->
+
+    //     stock ->
+    //     CREATE TABLE Stock (
+    //     sid INT AUTO_INCREMENT PRIMARY KEY,
+    //     cid INT,
+    //     size VARCHAR(50) NOT NULL,
+    //     stock_quantity INT NOT NULL,
+    //     buying_price DECIMAL(10, 2) NOT NULL,
+    //     selling_price DECIMAL(10, 2) NOT NULL,
+    //     buying_date DATE NOT NULL,
+    //     FOREIGN KEY (cid) REFERENCES category(cid)
+    // );
     public static void pushToStock(int cid, String size, int stock_quantity, int buying_price, int selling_price, String buying_date){
-        String query = "insert into category() values (?)";
+        String query = "insert into stock(cid,size,stock_quantity,buying_price,selling_price,buying_data) values (?,?,?,?,?,?)";
         try{
             statement = getConnection().prepareStatement(query);
+            statement.setInt(1, cid);
+            statement.setString(2,size);
+            statement.setInt(3,stock_quantity);
+            statement.setInt(4,buying_price);
+            statement.setInt(5,selling_price);
+            statement.setString(5,buying_date);
             int x = statement.executeUpdate();
             connection.close();
             System.out.println(x+" Rows has been updated");
@@ -77,6 +112,17 @@ public class SQLManager {
             exc.printStackTrace();
         }
     }
+
+
+
+    public static void pushToTransactions(){
+
+        
+    }
+
+
+
+
 
 
 
