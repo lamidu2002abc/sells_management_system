@@ -1,3 +1,4 @@
+//dev branch
 package Backend;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,12 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SQLManager {
-//    main tables -> 
-//          -> category
-//          -> stock
-//          -> transactio
-//          -> inventory
-
+//    push data to the db
+//    pull data from the db
+//    delete data from the db
     
 //    Defining essential attributes for sql Connection
     private static final String url = "jdbc:mysql://localhost:3306/anuhasdatabase";
@@ -23,6 +21,9 @@ public class SQLManager {
     private static Connection connection;
     private static PreparedStatement statement;
     
+    SQLManager(){
+        System.out.println("sql manager is activated");
+    }
     
 //    method to create the connection with mysql database
 //    use try catch when you call this method to handle the throwing SQLexception
@@ -33,18 +34,18 @@ public class SQLManager {
         }
         return connection;
     } 
-
-//      pushing data into tables
-
-//      category ->
-    public static void pushToCategory(String categoryName){
-        String query = "insert into category(c_name) values (?)";
+    
+//    -------------------- cloth category table --------------------
+//    updating the cloth category table with category_id and category name and returns the updated rows
+    public static void pushToClothCategoryTable(int category_id, String category_name){
+        String query = "insert into cloth_category_table values (?,?)";
         try{
             statement = getConnection().prepareStatement(query);
-            statement.setString(1,categoryName);
+            statement.setInt(1,category_id);
+            statement.setString(2,category_name);
             int x = statement.executeUpdate();
             connection.close();
-            System.out.println(x+" Rows has been updated");
+            System.out.println(x+" rows has been updated");
         }
         catch(SQLException exc){
             System.out.println(exc.getMessage());
@@ -52,41 +53,8 @@ public class SQLManager {
             exc.printStackTrace();
         }
     }
-//     CREATE TABLE Stock (
-//     sid INT AUTO_INCREMENT PRIMARY KEY,
-//     cid INT,
-//     size VARCHAR(50) NOT NULL,
-//     stock_quantity INT NOT NULL,
-//     buying_price DECIMAL(10, 2) NOT NULL,
-//     selling_price DECIMAL(10, 2) NOT NULL,
-//     buying_date DATE NOT NULL,
-//     FOREIGN KEY (cid) REFERENCES category(cid)
-// );
-//      category ->
-    public static void pushToStock(int cid, String size, int stock_quantity, int buying_price, int selling_price, String buying_date){
-        String query = "insert into category() values (?)";
-        try{
-            statement = getConnection().prepareStatement(query);
-            int x = statement.executeUpdate();
-            connection.close();
-            System.out.println(x+" Rows has been updated");
-        }
-        catch(SQLException exc){
-            System.out.println(exc.getMessage());
-            System.out.println("\n---- stack trace ----");
-            exc.printStackTrace();
-        }
-    }
-
-
-
-
-
-
-
-
     public static ResultSet pullFromClothCategoryTable(int category_id){
-        String query = "select * from cloth_category where category_id = ?";
+        String query = "select * from cloth_category_table where category_id = ?";
         Map <Integer,String> categorySet = new HashMap<>();
         try{
             statement = getConnection().prepareStatement(query);
@@ -104,7 +72,7 @@ public class SQLManager {
         }
     } 
     public static Map<Integer,String> pullAllFromClothCategoryTable(){
-        String query = "select * from cloth_category";
+        String query = "select * from cloth_category_table";
         Map <Integer,String> categorySet = new HashMap<>();
         try{
             statement = getConnection().prepareStatement(query);
