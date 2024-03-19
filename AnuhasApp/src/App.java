@@ -25,7 +25,10 @@ public class App {
         // Map<Integer,String> myMap = SQLManager.getAllCategories(); working!
         // System.out.println(myMap);
 
-        SQLManager.truncateTable("stock");
+        // SQLManager.truncateTable("stock");
+
+        SQLManager.pushToStock(3, "M", 10, 20, 25, getDate());
+        SQLManager.pushToStock(1, "L", 20, 15, 20, getDate());
 
 
 

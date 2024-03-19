@@ -26,29 +26,18 @@ public class SQLManager {
     private static PreparedStatement statement;
     
     
-//    method to create the connection with mysql database
-//    use try catch when you call this method to handle the throwing SQLexception
-//    do not forget to close the connection after doing the process
+// main functions >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    //  sets connection between the application and the mysql server 
     private static Connection getConnection()throws SQLException{
-        if (connection == null || connection.isClosed()){
-            connection = DriverManager.getConnection(url,userName,password);
-        }
+        if (connection == null || connection.isClosed()) {connection = DriverManager.getConnection(url,userName,password);}
         return connection;
     } 
 
-//  this will execute any number of cols in tables not multiple raws at a time. 
-    private static void insertDataToTable(String query, Object[] array) {
-        // testing perpose===============================================
-        // for (Object object : array) {
-        //     System.out.print(object +" "+ object.getClass());
-        //     if (object instanceof String) System.out.println("  its String!!!");
-        //     else if (object instanceof Double) System.out.println("  its Double!!!");
-        //     else if (object instanceof Integer) System.out.println("  its Integer!!!");
-        //     else System.out.println("  unknown data type!!!");
-        // }
-
+    //  executes any number of cols in tables not multiple raws at a time. 
+    private static int updateTable(String query, Object[] array) {
+        int generatedKey = -1;
         try{
-            statement = getConnection().prepareStatement(query);
+            statement = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             int i=1;
             for (Object object : array) {
                 if (object instanceof String) statement.setString(i,(String) object);
@@ -57,29 +46,58 @@ public class SQLManager {
                 else System.out.println("  unknown data type!!!");
                 i++;     
             }
-            int x = statement.executeUpdate();
-            System.out.println(x+" Rows has been updated");
+            int updatedRowsCount = statement.executeUpdate();
+            System.out.println(updatedRowsCount+" Rows has been updated");
+            //auto generated keys
+            ResultSet resultSet = statement.getGeneratedKeys();
+            if (resultSet.next()) {generatedKey = resultSet.getInt(1);}    
             connection.close();
         }
         catch(SQLException exc){
             System.out.println(exc.getMessage());
             System.out.println("\n---- stack trace ----");
             exc.printStackTrace();
-        }   
+        }
+        return generatedKey;   
     }
 
-//    gets the buying price for the sid;
-    public static Object getSellingPrice(int sid){
+    
+// system procedurs >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 
+    //  --adding new category to the system--
+    public static void addNewCategory(String categoryName){
+        String query = "insert into category(cname) values (?)";
+        updateTable(query, new Object[]{categoryName});
+    }
+
+    //  --adding new stock to the system--
+    public static void addNewStock(int cid, String size, int squantity, double buying_price, double selling_price, String buying_date){
+        String query = "insert into stock(cid,size,squantity,buying_price,selling_price,buying_date) values (?,?,?,?,?,?)";
+        int sid = updateTable(query, new Object[] {cid,size,squantity,buying_price,selling_price,buying_date});
+        addStocksToInventory(sid, squantity);//updates inventory aswell! 
+    }
+    //  adding new stock to the inventory 
+    private static void addStocksToInventory(int sid, int squantity){
+        String query = "insert into inventory(sid,squantity) values (?,?) ON DUPLICATE KEY UPDATE squantity = squantity + VALUES(squantity);";
+        updateTable(query, new Object[] {sid,squantity});
+    }
+
+    //  --doing new transaction--
+    public static void doTransaction(String date,String customer_name,String customer_address,int customer_tel_number,int sid,int count){
+        String query = "insert into transactions(date,customer_name,customer_address,customer_tel_number,sid,count,amount) values (?,?,?,?,?,?,?)";
+        double buying_price = (double) getSellingPrice(sid);
+        double amount = count*buying_price;
+        updateTable(query, new Object[] {date,customer_name,customer_address,customer_tel_number,sid,count,amount});
+        removeItemsFromInventory(sid,count);
+    }
+    //  gets the buying price for the sid;
+    private static Object getSellingPrice(int sid){
         String query = "select selling_price from stock where sid = ?";
         double selling_price = 0;
         try{
             statement = getConnection().prepareStatement(query);
             statement.setInt(1,sid);
             ResultSet dataSet = statement.executeQuery();
-
-            while (dataSet.next()) {
-                selling_price = dataSet.getDouble("selling_price");
-            }
+            while (dataSet.next()) {selling_price = dataSet.getDouble("selling_price");}
             connection.close();
             return selling_price;
         }
@@ -90,37 +108,11 @@ public class SQLManager {
             return null;
         }   
     }
-
-
-
-
-
-
-    //     PUSHING DATA INTO TABLES=========================================>
-    
-    //     category ->
-    public static void pushToCategory(String categoryName){
-        String query = "insert into category(cname) values (?)";
-        insertDataToTable(query, new Object[]{categoryName});
+    // removing items from the inventory
+    private static void removeItemsFromInventory(int sid,int count){
+        String query = " ";
+        updateTable(query,new Object[]{sid,count});
     }
-
-    //     stock ->
-    public static void pushToStock(int cid, String size, int stock_quantity, double buying_price, double selling_price, String buying_date){
-        String query = "insert into stock(cid,size,squantity,buying_price,selling_price,buying_date) values (?,?,?,?,?,?)";
-        insertDataToTable(query, new Object[] {cid,size,stock_quantity,buying_price,selling_price,buying_date});
-    }
-
-    //     inventory ->
-    // write the code to add the stock into the inventory when you add stocks
-
-    //     transaction -> 
-    public static void pushToTransactions(String date,String customer_name,String customer_address,int customer_tel_number,int sid,int count){
-        String query = "insert into transactions(date,customer_name,customer_address,customer_tel_number,sid,count,amount) values (?,?,?,?,?,?,?)";
-        double buying_price = (double) getSellingPrice(sid);
-        double amount = count*buying_price;
-        insertDataToTable(query, new Object[] {date,customer_name,customer_address,customer_tel_number,sid,count,amount});
-    }
-    // create method to be called when you do the transaction for decrement the quantity of the stocks that is sold from the invetory table 
 
 
     
